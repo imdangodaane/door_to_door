@@ -2,19 +2,14 @@
 
 
 class Node:
-    #
     def __init__(self, city_name, latitude, longitude):
         self.city_name = city_name
-        self.latitude = latitude
-        self.longitude = longitude
+        self.lat = latitude
+        self.long = longitude
         self.connected_to = {}
 
-    def add_neighbor(self, nbr, weight=0):
-        self.connected_to[nbr] = weight
-
-    def __str__(self):
-        return str(self.city_name) + 'connected to' + str([x.city_name
-                   for x in self.connected_to])
+    def add_neighbor(self, nbr, distance=None):
+        self.connected_to[nbr] = distance
 
     def get_connections(self):
         return self.connected_to.keys()
@@ -22,5 +17,11 @@ class Node:
     def get_city_name(self):
         return self.city_name
 
-    def get_weight(self, nbr):
+    def get_distance(self, nbr):
         return self.connected_to[nbr]
+
+    def find_nearest_neighbor(self):
+        try:
+            return min(self.connected_to.keys(), key=lambda k: self.connected_to[k])
+        except ValueError:
+            return None
