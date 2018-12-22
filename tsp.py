@@ -33,11 +33,24 @@ def nearest_neighbor():
     pass
 
 
+def sorted_cities(city_list):
+    tmp = []
+    for city in city_list:
+        tmp.append(city.split(', '))
+    tmp.sort(key=lambda x: (float(x[1]), float(x[2])))
+    return tmp
+
+
 def main():
     '''
     '''
     filename, choice = get_from_cmd()
     content = valid_and_read(filename)
+    cities = content.split('\n')[:-1]
+    first_city = cities[0]
+    cities = sorted_cities(cities)
+    print(first_city)
+
     if choice == 'nn':
         nearest_neighbor()
     else:

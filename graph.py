@@ -49,7 +49,7 @@ class Graph:
         self.city_list[city_name] = new_city
         return new_city
 
-    def add_edge(self, first_vertex, second_vertex, weight=None):
+    def add_edge(self, first_city, second_city, weight=None):
         pass
 
     def get_city(self, city_name):
