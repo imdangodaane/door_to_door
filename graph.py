@@ -51,9 +51,19 @@ class Graph:
         return new_city
 
     def add_edge(self, first_city, second_city, distance=None):
-        pair = '<=>'.join([first_city, second_city])
-        self.distance_dict[pair] = distance
-        return pair
+        # pair = '<=>'.join([first_city, second_city])
+        # self.distance_dict[pair] = distance
+        # return pair
+        try:
+            self.distance_dict[first_city].add((second_city, distance))
+        except KeyError:
+            self.distance_dict[first_city] = set()
+            self.distance_dict[first_city].add((second_city, distance))
+        try:
+            self.distance_dict[second_city].add((first_city, distance))
+        except KeyError:
+            self.distance_dict[second_city] = set()
+            self.distance_dict[second_city].add((first_city, distance))
 
     def get_city(self, city_name):
         if city_name in self.city_list:
@@ -68,7 +78,7 @@ class Graph:
         return self.city_list.values()
 
     def get_distance_dict(self):
-        return self.distance_dict.items()
+        return self.distance_dict
 
     def find_shortest_path(self):
         # Object method using for find the shortest path and return it as a

@@ -39,8 +39,10 @@ def find_all_neighbor():
 
 
 def make_graph(cities):
-    now = time.time()
-    cities = sort_and_slice(cities)
+    tmp = []
+    for city in cities:
+        tmp.append(city.split(', '))
+    cities = list(tmp)
     _graph = Graph()
     for city in cities:
         if city:
@@ -52,35 +54,30 @@ def make_graph(cities):
             distance = calc_distance(city.lat, city.long,
                                      queue[i].lat, queue[i].long)
             _graph.add_edge(city.city_name, queue[i].city_name, distance)
-            city.add_neighbor(queue[i].city_name, distance)
-    print(time.time() - now)
+            # city.add_neighbor(queue[i].city_name, distance)
     return _graph
 
 
 def nearest_neighbor(cities):
-    first_city = cities[0].split(', ')[0]
+    last_visit = cities[0].split(', ')[0]
+    total_distance = 0
+    flag = time.time()
     _graph = make_graph(cities)
+    print("Make graph time = " + str(time.time() - flag))
     path = []
-    queue = collections.deque()
-    path.append(first_city)
-    queue.append(first_city)
-    tmp = list(_graph.get_distance_dict())
-    tmp.sort(key=itemgetter(1))
-    while queue:
-        if len(path) == len(cities):
-            break
-        for i in range(len(tmp)):
-            if first_city in tmp[i][0]:
-                eles = tmp[i][0].split('<=>')
-                if first_city == eles[0]:
-                    nearest_city = eles[1]
-                else:
-                    nearest_city = eles[0]
-                path.append(nearest_city)
-                queue.append(nearest_city)
-                del tmp[i]
+    path.append(last_visit)
+    distance_dict = _graph.get_distance_dict()
+    while len(path) != len(cities):
+        last_visit = path[-1]
+        tmp = list(distance_dict[last_visit])
+        tmp.sort(key=itemgetter(1))
+        for city in tmp:
+            if city[0] not in path:
+                path.append(city[0])
+                total_distance += city[1]
                 break
     print(path)
+    print("Total distance = " + str(total_distance))
 
 
 def my_algorithm():
@@ -113,4 +110,6 @@ def main():
 
 
 if __name__ == "__main__":
+    flag = time.time()
     main()
+    print("Total time = " + str(time.time() - flag))
