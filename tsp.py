@@ -4,7 +4,7 @@ import sys
 import collections
 import time
 from operator import itemgetter
-from subprocess import Popen
+from random import shuffle
 from node import Node
 from graph import Graph
 
@@ -30,15 +30,13 @@ def valid_and_read(filename):
 
 
 def calc_distance(x1, y1, x2, y2):
+    # Calculate distance base-on Euclid
     x1, y1, x2, y2 = float(x1), float(y1), float(x2), float(y2)
     return round((abs(x1 - x2) ** 2 + abs(y1 - y2) ** 2) ** (1/2), 4)
 
 
-def find_all_neighbor():
-    pass
-
-
 def make_graph(cities):
+    # Make graph object
     tmp = []
     for city in cities:
         tmp.append(city.split(', '))
@@ -59,40 +57,73 @@ def make_graph(cities):
 
 
 def nearest_neighbor(cities):
-    last_visit = cities[0].split(', ')[0]
-    total_distance = 0
-    flag = time.time()
+    # Nearest neighbor algorithm
+    first_city = cities[0].split(', ')[0]
     _graph = make_graph(cities)
-    print("Make graph time = " + str(time.time() - flag))
-    path = []
-    path.append(last_visit)
-    distance_dict = _graph.get_distance_dict()
-    while len(path) != len(cities):
-        last_visit = path[-1]
-        tmp = list(distance_dict[last_visit])
-        tmp.sort(key=itemgetter(1))
-        for city in tmp:
-            if city[0] not in path:
-                path.append(city[0])
-                total_distance += city[1]
-                break
-    print(path)
-    print("Total distance = " + str(total_distance))
-
-
-def my_algorithm():
-    # My solution for this project
-    first_city = cities[0]
-    cities = sort_and_slice(cities)
-    percent = round(len(_graph.get_cities()) / 10)
+    _graph.nearest_neighbor(first_city)
 
 
 def sort_and_slice(cities):
+    # Slice cities into list of cities, then sort by second and third
+    # element (latitude and longitude)
     tmp = []
     for city in cities:
         tmp.append(city.split(', '))
     tmp.sort(key=lambda x: (float(x[1]), float(x[2])))
     return tmp
+
+
+def calc_total_distance(cities):
+    # Calculate total distance of a city list
+    total_distance = 0
+    for i in range(len(cities) - 1):
+        total_distance += calc_distance(cities[i][1], cities[i][2],
+                                        cities[i+1][1], cities[i+1][2])
+    return total_distance
+
+
+def find_best_route(list_cities):
+    # Find best route of a city list base-on total distance
+    total_distance = 10000
+    best_route = None
+    for pair in list_cities:
+        tmp = calc_total_distance(pair)
+        if tmp < total_distance:
+            total_distance = tmp
+            best_route = pair
+    print(total_distance)
+    return best_route
+
+
+def my_algorithm(cities):
+    # My solution for this project
+    path = []
+    first_city = cities[0].split(', ')
+    path.append(cities[0].split(', ')[0])
+    cities = sort_and_slice(cities)
+    percent = round(len(cities) / 10)
+    shuffle_times = round(len(cities))
+    ind = cities.index(first_city)
+    # while len(path) != len(cities):
+    last_visit = first_city
+    tmp = []
+    shuffle_list = []
+    for i in range(ind - percent, ind + percent):
+        try:
+            if i == ind: # Don't append last city
+                continue
+            tmp.append(cities[i])
+        except IndexError:
+            continue
+    for i in range(shuffle_times):
+        _ = list(tmp)
+        shuffle(_)
+        _.insert(0, first_city)
+        shuffle_list.append(_)
+    print(shuffle_list)
+    best_route = find_best_route(shuffle_list)
+    print(best_route)
+    # print(path)
 
 
 def main():
@@ -101,12 +132,10 @@ def main():
     filename, choice = get_from_cmd()
     content = valid_and_read(filename)
     cities = content.split('\n')[:-1]
-    nearest_neighbor(cities)
     if choice == 'nn':
-        # nearest_neighbor(cities)
-        pass
+        nearest_neighbor(cities)
     else:
-        pass
+        my_algorithm(cities)
 
 
 if __name__ == "__main__":

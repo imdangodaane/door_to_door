@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from node import Node
+from operator import itemgetter
 
 
 class Graph:
@@ -51,9 +52,6 @@ class Graph:
         return new_city
 
     def add_edge(self, first_city, second_city, distance=None):
-        # pair = '<=>'.join([first_city, second_city])
-        # self.distance_dict[pair] = distance
-        # return pair
         try:
             self.distance_dict[first_city].add((second_city, distance))
         except KeyError:
@@ -85,3 +83,19 @@ class Graph:
         # list
         solution = []
         return solution
+
+    def nearest_neighbor(self, first_city):
+        total_distance = 0
+        path = []
+        path.append(first_city)
+        while len(path) != len(self.distance_dict.keys()):
+            last_visit = path[-1]
+            tmp = list(self.distance_dict[last_visit])
+            tmp.sort(key=itemgetter(1))
+            for city in tmp:
+                if city[0] not in path:
+                    path.append(city[0])
+                    total_distance += city[1]
+                    break
+        print(path)
+        print("Total distance = " + str(total_distance))
