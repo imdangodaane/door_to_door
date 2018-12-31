@@ -69,8 +69,11 @@ class Graph:
         else:
             return None
 
-    def get_city_names(self):
-        return self.city_list.keys()
+    def get_city_names(self, excep=None):
+        tmp = list(self.city_list.keys())
+        if excep and excep in tmp:
+            tmp.remove(excep)
+        return tmp
 
     def get_cities(self):
         return self.city_list.values()
@@ -83,6 +86,15 @@ class Graph:
         # list
         solution = []
         return solution
+
+    def g_calc_distance(self, cities):
+        total = 0
+        for i in range(len(cities) - 1):
+            for city in self.distance_dict[cities[i]]:
+                if cities[i+1] == city[0]:
+                    total += city[1]
+                    break
+        return total
 
     def nearest_neighbor(self, first_city):
         total_distance = 0

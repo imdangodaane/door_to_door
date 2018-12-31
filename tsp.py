@@ -4,10 +4,11 @@ import sys
 import collections
 import time
 from operator import itemgetter
-from random import shuffle
+from random import shuffle, random, randint
+from itertools import permutations
+from math import inf
 from node import Node
 from graph import Graph
-
 
 
 def get_from_cmd():
@@ -61,6 +62,100 @@ def nearest_neighbor(cities):
     first_city = cities[0].split(', ')[0]
     _graph = make_graph(cities)
     _graph.nearest_neighbor(first_city)
+
+
+def brute_force(cities):
+    # first_city = cities[0].split(', ')[0]
+    # _graph = make_graph(cities)
+    # city_names = list(_graph.get_city_names())
+    # routes = list(permutations(city_names))
+    # print(len(routes))
+    pass
+
+
+def make_population(cities, _graph):
+    # Make population from graph object
+    first_city = cities[0].split(', ')[0]
+    total_cities = len(cities)
+    population = []
+    cities = list(_graph.get_city_names(excep=first_city))
+    for i in range(len(cities)):
+        shuffle(cities)
+        tmp = list(cities)
+        tmp.insert(0, first_city)
+        population.append(tmp)
+    return population
+
+
+def normalize_fitness(fitness):
+    # Normalize fitness depend on percent
+    total = 0
+    for i in range(len(fitness)):
+        total += fitness[i]
+    for i in range(len(fitness)):
+        fitness[i] /= total
+    return fitness
+
+
+def pick_one(_list, prob):
+    # Pick one random from _list with probability
+    ind = 0
+    r = random()
+    while r > 0:
+        r -= prob[ind]
+        ind += 1
+    ind -= 1
+    return _list[ind]
+
+
+def mutate(_order, mutation_rate):
+    # Swap element to next element (using for mutate)
+    for i in range(len(_order)):
+        if random() < mutation_rate:
+            index_A = randint(0, len(_order) - 1)
+            index_B = index_A + 1
+            if index_B >= len(_order):
+                index_B = index_A - 1
+            _order[index_A], _order[index_B] = _order[index_B], _order[index_A]
+    return _order
+
+
+def make_next_generation(population, fitness):
+    # Make new generation from old population
+    new_population = []
+    first_city = population[0][0]
+    for i in range(len(population)):
+        population[i].remove(first_city)
+    for i in range(len(population)):
+        _order = list(pick_one(population, fitness))
+        _order = mutate(_order, 0.1)
+        _order.insert(0, first_city)
+        new_population.append(_order)
+    return new_population
+
+
+def genetic_algorithm(cities):
+    # Make population
+    fitness = []
+    best_popu = None
+    best_fitness = inf
+    _graph = make_graph(cities)
+    population = make_population(cities, _graph)
+    while best_fitness:
+        # Calculate fitness
+        for popu in population:
+            d = _graph.g_calc_distance(popu)
+            print("Distance from new population: ", d)
+            print("Shorest recode: ", best_fitness)
+            if d < best_fitness:
+                best_fitness = d
+                best_popu = popu
+            fitness.append(1 / (_graph.g_calc_distance(popu) + 1 ))
+        # Normalize fitness
+        fitness = normalize_fitness(fitness)
+        # Make next generation
+        population = make_next_generation(population, fitness)
+        fitness = []
 
 
 def sort_and_slice(cities):
@@ -134,6 +229,10 @@ def main():
     cities = content.split('\n')[:-1]
     if choice == 'nn':
         nearest_neighbor(cities)
+    elif choice == 'bf':
+        brute_force(cities)
+    elif choice == 'ga':
+        genetic_algorithm(cities)
     else:
         my_algorithm(cities)
 
